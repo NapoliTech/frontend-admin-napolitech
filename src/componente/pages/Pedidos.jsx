@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PedidosTable from "../organismo/PedidosTable";
 import {
   Box,
@@ -98,9 +98,9 @@ const Pedidos = () => {
     setFilteredPedidos(filtered);
   }, [searchParams, allPedidos]);
 
-  const handleSearch = (params) => {
+  const handleSearch = useCallback((params) => {
     setSearchParams(params);
-  };
+  }, []);
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);

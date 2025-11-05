@@ -73,15 +73,20 @@ const MontarPedidoForm = ({ onContinue, onRetirarNaLoja }) => {
   const canAddPedido = isSelectionEnabled && tempSelectedPizzas.length > 0;
   const canContinue = pedidos.length > 0;
 
+  const [apiError, setApiError] = useState(null);
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      setApiError(null);
       try {
-        // Usar a função getProdutos do pedidoService
         const produtosData = await pedidoService.getProdutos();
-        setProdutos(produtosData);
+        // Garantir que produtos seja sempre um array
+        setProdutos(Array.isArray(produtosData) ? produtosData : []);
       } catch (error) {
         console.error("Erro ao carregar dados:", error);
+        setApiError(error.message || "Erro ao carregar produtos. Tente novamente.");
+        setProdutos([]); // Garantir que produtos seja um array vazio em caso de erro
       } finally {
         setLoading(false);
       }
@@ -258,6 +263,43 @@ const MontarPedidoForm = ({ onContinue, onRetirarNaLoja }) => {
         <Typography variant="h6" sx={{ ml: 2 }}>
           Carregando cardápio...
         </Typography>
+      </Box>
+    );
+  }
+
+  if (apiError) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 2,
+          p: 3,
+        }}
+      >
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {apiError}
+        </Alert>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setLoading(true);
+            setApiError(null);
+            pedidoService
+              .getProdutos()
+              .then((data) => {
+                setProdutos(Array.isArray(data) ? data : []);
+              })
+              .catch((error) => {
+                setApiError(error.message || "Erro ao carregar produtos. Tente novamente.");
+                setProdutos([]);
+              })
+              .finally(() => setLoading(false));
+          }}
+        >
+          Tentar Novamente
+        </Button>
       </Box>
     );
   }

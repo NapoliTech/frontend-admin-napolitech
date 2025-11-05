@@ -8,8 +8,9 @@ export const pedidosAtivos = {
   listarPedidosAtivos: async () => {
     try {
       const response = await httpClient.get("/api/pedidos");
-      console.log(response.data);
-      return response.data;
+      console.log("Resposta completa:", response.data);
+      // Retorna o array de pedidos do content
+      return response.data.content || [];
     } catch (error) {
       console.error("Erro ao listar pedidos:", error);
       throw new Error(
