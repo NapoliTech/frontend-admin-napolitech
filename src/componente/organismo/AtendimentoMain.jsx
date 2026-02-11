@@ -5,6 +5,7 @@ import DashboardCards from "../moleculas/DashboardCards";
 import DashboardCharts from "./DashboardCharts";
 import MontarPedido from "../pages/MontarPedido";
 import Pedidos from "../pages/Pedidos";
+import ControleEstoque from "../pages/ControleEstoque";
 import { dashboardService } from "../../services/dashboardService";
 
 const AtendimentoMain = () => {
@@ -113,6 +114,7 @@ const AtendimentoMain = () => {
         {currentView === "montarPedido" && (
           <MontarPedido onNavigate={handleMenuClick} />
         )}
+        {currentView === "estoque" && <ControleEstoque />}
       </Box>
     </Box>
   );

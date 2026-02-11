@@ -19,6 +19,7 @@ import {
   AddShoppingCart as MontarPedidoIcon,
   Brightness4,
   Brightness7,
+  Inventory as InventoryIcon,
 } from "@mui/icons-material";
 import { useTheme } from "../contexts/ThemeContext";
 
@@ -109,6 +110,21 @@ const SideNav = ({ onMenuClick }) => {
                 <MontarPedidoIcon />
               </ListItemIcon>
               {open && <ListItemText primary="Montar Pedido" />}
+            </ListItemButton>
+            <ListItemButton
+              onClick={() => onMenuClick("estoque")}
+              sx={{
+                "&:hover": {
+                  backgroundColor: isDarkMode
+                    ? "action.hover"
+                    : "rgba(0, 0, 0, 0.04)",
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: "inherit" }}>
+                <InventoryIcon />
+              </ListItemIcon>
+              {open && <ListItemText primary="Controle de Estoque" />}
             </ListItemButton>
             <Divider />
             <ListItemButton
