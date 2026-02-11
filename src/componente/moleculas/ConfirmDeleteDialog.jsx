@@ -9,6 +9,8 @@ import {
   Box,
   Alert,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Warning as WarningIcon,
@@ -26,6 +28,9 @@ const ConfirmDeleteDialog = ({
   produto,
   loading = false,
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   const handleConfirm = () => {
     if (produto) {
       onConfirm(produto.id);
@@ -38,9 +43,10 @@ const ConfirmDeleteDialog = ({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      fullScreen={isMobile}
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: isMobile ? 0 : 2,
         },
       }}
     >

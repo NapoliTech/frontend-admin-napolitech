@@ -1,95 +1,79 @@
 import React from "react";
-import { Box, Paper, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import LineChart from "../moleculas/LineChart";
 import BarChart from "../moleculas/BarChart";
 import DistributionChart from "../moleculas/DistributionChart";
 
+/**
+ * Gráficos do dashboard empilhados verticalmente
+ * Cada gráfico ocupa 100% da largura disponível
+ */
 const DashboardCharts = ({
   weeklyData,
   distributionData,
   ultimosSeteDias,
   loading,
 }) => {
-  const theme = useTheme();
-  const isMediumScreen = useMediaQuery("(max-width:1366px)");
-
+  const { isMobile } = useBreakpoint();
+  
+  // Padding e altura responsivos
+  const paperPadding = isMobile ? 2 : 3;
+  const chartHeight = isMobile ? 300 : 500;
+  
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        mt: 5,
-        height: "calc(100vh - 180px)",
-        width: "100%",
-        overflow: "auto",
-      }}
-    >
-      <Box
+    <Stack spacing={{ xs: 2, md: 3 }} sx={{ mt: { xs: 3, md: 4 }, width: "100%" }}>
+      {/* Gráfico 1: Vendas por Categoria */}
+      <Paper
         sx={{
+          p: paperPadding,
+          height: chartHeight,
           display: "flex",
-          gap: "24px",
-          height: "calc(50% - 12px)",
+          flexDirection: "column",
           width: "100%",
         }}
       >
-        <Paper
-          sx={{
-            width: "50%",
-            height: "100%",
-            p: isMediumScreen ? 1.5 : 2,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <BarChart
-            data={distributionData}
-            loading={loading}
-            title="Vendas por Categoria"
-          />
-        </Paper>
+        <BarChart
+          data={distributionData}
+          loading={loading}
+          title="Vendas por Categoria"
+        />
+      </Paper>
 
-        <Paper
-          sx={{
-            width: "50%",
-            height: "100%",
-            p: isMediumScreen ? 1.5 : 2,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <BarChart
-            data={ultimosSeteDias}
-            loading={loading}
-            title="Vendas dos Últimos 7 Dias"
-          />
-        </Paper>
-      </Box>
-      <Box
+      {/* Gráfico 2: Vendas dos Últimos 7 Dias */}
+      <Paper
         sx={{
+          p: paperPadding,
+          height: chartHeight,
           display: "flex",
-          gap: "24px",
-          height: "calc(50% - 12px)",
+          flexDirection: "column",
           width: "100%",
         }}
       >
-        <Paper
-          sx={{
-            width: "100%",
-            height: "100%",
-            p: isMediumScreen ? 1.5 : 2,
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <LineChart
-            data={weeklyData}
-            loading={loading}
-            title="Faturamento Anual"
-          />
-        </Paper>
-      </Box>
-    </Box>
+        <BarChart
+          data={ultimosSeteDias}
+          loading={loading}
+          title="Vendas dos Últimos 7 Dias"
+        />
+      </Paper>
+
+      {/* Gráfico 3: Faturamento Anual */}
+      <Paper
+        sx={{
+          p: paperPadding,
+          height: chartHeight,
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+        }}
+      >
+        <LineChart
+          data={weeklyData}
+          loading={loading}
+          title="Faturamento Anual"
+        />
+      </Paper>
+    </Stack>
   );
 };
 

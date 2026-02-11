@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Box } from "@mui/material";
 import DashboardCards from "../moleculas/DashboardCards";
 import DashboardCharts from "../organismo/DashboardCharts";
 
@@ -22,12 +23,9 @@ const Dashboard = () => {
   ]);
 
   return (
-    <Box
-      
-    >
-      
+    <Box>
       <DashboardCards cardsData={cardsData} loading={loading} />
-      <DashboardCharts  
+      <DashboardCharts
         weeklyData={weeklyData}
         distributionData={distributionData}
         loading={loading}

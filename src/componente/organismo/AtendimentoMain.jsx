@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
-import SideNav from "../moleculas/SideNav";
+import ResponsiveDrawer from "../moleculas/ResponsiveDrawer";
 import DashboardCards from "../moleculas/DashboardCards";
 import DashboardCharts from "./DashboardCharts";
 import MontarPedido from "../pages/MontarPedido";
 import Pedidos from "../pages/Pedidos";
 import ControleEstoque from "../pages/ControleEstoque";
 import { dashboardService } from "../../services/dashboardService";
+import useBreakpoint from "../../hooks/useBreakpoint";
 
 const AtendimentoMain = () => {
   const [currentView, setCurrentView] = useState("dashboard");
@@ -15,69 +16,91 @@ const AtendimentoMain = () => {
   const [weeklyData, setWeeklyData] = useState([]);
   const [distributionData, setDistributionData] = useState([]);
   const [ultimosSeteDias, setUltimosSeteDias] = useState([]);
+  
+  const { isMobile, isTablet, getPagePadding } = useBreakpoint();
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await dashboardService.getKPIs();
-      let resposta = response.kpis;
-      const newCardsData = [
-        {
-          title: "Pedidos em Aberto",
-          value: resposta.pedidosEmAberto,
-          icon: "pending",
-          color: "#ff9800",
-        },
-        {
-          title: "Pedidos Totais",
-          value: resposta.pedidosTotais,
-          icon: "total",
-          color: "#2196f3",
-        },
-        {
-          title: "Faturamento Diário",
-          value: `R$ ${resposta.faturamentoDiario.toFixed(2)}`,
-          icon: "money",
-          color: "#9c27b0",
-        },
-        {
-          title: "Pedidos Finalizados",
-          value: resposta.pedidosFinalizados,
-          icon: "done",
-          color: "#4caf50",
-        },
-      ];
-      setCardsData(newCardsData);
+      try {
+        const response = await dashboardService.getKPIs();
+        let resposta = response.kpis;
+        const newCardsData = [
+          {
+            title: "Pedidos em Aberto",
+            value: resposta.pedidosEmAberto,
+            icon: "pending",
+            color: "#ff9800",
+          },
+          {
+            title: "Pedidos Totais",
+            value: resposta.pedidosTotais,
+            icon: "total",
+            color: "#2196f3",
+          },
+          {
+            title: "Faturamento Diário",
+            value: `R$ ${resposta.faturamentoDiario.toFixed(2)}`,
+            icon: "money",
+            color: "#9c27b0",
+          },
+          {
+            title: "Pedidos Finalizados",
+            value: resposta.pedidosFinalizados,
+            icon: "done",
+            color: "#4caf50",
+          },
+        ];
+        setCardsData(newCardsData);
+      } catch (error) {
+        console.error("Erro ao carregar KPIs:", error);
+        setCardsData([]);
+      }
     };
     fetchData();
   }, []);
 
   useEffect(() => {
     const fetchFaturamento = async () => {
-      const anoAtual = new Date().getFullYear();
-      const response = await dashboardService.getFaturamentoAnual(anoAtual);
-      setWeeklyData(response.faturamentoAnual);
+      try {
+        const anoAtual = new Date().getFullYear();
+        const response = await dashboardService.getFaturamentoAnual(anoAtual);
+        setWeeklyData(response.faturamentoAnual);
+      } catch (error) {
+        console.error("Erro ao carregar faturamento anual:", error);
+        setWeeklyData([]);
+      }
     };
     fetchFaturamento();
   }, []);
 
   useEffect(() => {
     const fetchDistribuicao = async () => {
-      const dataAtual = new Date();
-      const anoAtual = dataAtual.getFullYear();
-      const mesAtual = dataAtual.getMonth() + 1;
-      const response = await dashboardService.getDistribuicaoVendas(
-        anoAtual,
-        mesAtual
-      );
-      setDistributionData(response);
+      try {
+        const dataAtual = new Date();
+        const anoAtual = dataAtual.getFullYear();
+        const mesAtual = dataAtual.getMonth() + 1;
+        const response = await dashboardService.getDistribuicaoVendas(
+          anoAtual,
+          mesAtual
+        );
+        setDistributionData(response);
+      } catch (error) {
+        console.error("Erro ao carregar distribuição de vendas:", error);
+        setDistributionData([]);
+      }
     };
     fetchDistribuicao();
   }, []);
 
   useEffect(() => {
     const fetchUltimosDias = async () => {
-      const response = await dashboardService.getVendasUltimosDias();
-      setUltimosSeteDias(response);
+      try {
+        const response = await dashboardService.getVendasUltimosDias();
+        setUltimosSeteDias(response);
+      } catch (error) {
+        console.error("Erro ao carregar vendas dos últimos dias:", error);
+        setUltimosSeteDias([]);
+      }
     };
     fetchUltimosDias();
   }, []);
@@ -87,20 +110,20 @@ const AtendimentoMain = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <SideNav onMenuClick={handleMenuClick} />
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <ResponsiveDrawer onMenuClick={handleMenuClick} />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
-          maxWidth: "1920px",
-          margin: "0 auto",
+          width: "100%",
+          mt: isMobile || isTablet ? 8 : 0,
+          p: getPagePadding(),
           boxSizing: "border-box",
         }}
       >
         {currentView === "dashboard" && (
-          <>
+          <Box sx={{ width: "100%", maxWidth: "100%" }}>
             <DashboardCards cardsData={cardsData} loading={loading} />
             <DashboardCharts
               weeklyData={weeklyData}
@@ -108,7 +131,7 @@ const AtendimentoMain = () => {
               ultimosSeteDias={ultimosSeteDias}
               loading={loading}
             />
-          </>
+          </Box>
         )}
         {currentView === "pedidos" && <Pedidos />}
         {currentView === "montarPedido" && (

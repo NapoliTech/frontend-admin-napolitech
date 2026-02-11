@@ -9,14 +9,23 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+  Stack,
+  Divider,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Add as AddIcon,
   Visibility as VisibilityIcon,
   Delete as DeleteIcon,
+  AttachMoney as MoneyIcon,
+  Inventory as InventoryIcon,
 } from "@mui/icons-material";
 import { useProdutos } from "../../hooks/useProdutos";
+import useBreakpoint from "../../hooks/useBreakpoint";
 import EstoqueCards from "../moleculas/EstoqueCards";
 import ProdutoFormDialog from "../moleculas/ProdutoFormDialog";
 import ProdutoDetailDialog from "../moleculas/ProdutoDetailDialog";
@@ -56,6 +65,112 @@ const getCategoriaLabel = (categoria) => {
 };
 
 /**
+ * Card de produto para visualização mobile
+ */
+const ProdutoCard = ({ produto, onView, onDelete }) => {
+  const getEstoqueColor = (quantidade) => {
+    if (quantidade === 0) return "error";
+    if (quantidade < 10) return "warning";
+    return "success";
+  };
+
+  return (
+    <Card
+      elevation={2}
+      sx={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: 4,
+        },
+      }}
+    >
+      <CardContent sx={{ flexGrow: 1, pb: 1 }}>
+        {/* Header com ID e Categoria */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+          <Chip
+            label={`#${produto.id}`}
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
+          <Chip
+            label={getCategoriaLabel(produto.categoriaProduto)}
+            size="small"
+            sx={{ fontWeight: 500 }}
+          />
+        </Box>
+
+        {/* Nome do Produto */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 600,
+            mb: 2,
+            fontSize: { xs: "1rem", sm: "1.125rem" },
+            lineHeight: 1.3,
+          }}
+        >
+          {produto.nome}
+        </Typography>
+
+        <Divider sx={{ my: 1 }} />
+
+        {/* Informações */}
+        <Stack spacing={1.5} sx={{ mt: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <MoneyIcon fontSize="small" color="success" />
+            <Typography variant="body2" color="text.secondary">
+              Preço:
+            </Typography>
+            <Typography variant="body1" sx={{ fontWeight: 600, ml: "auto" }}>
+              {formatarPreco(produto.preco)}
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <InventoryIcon fontSize="small" color="primary" />
+            <Typography variant="body2" color="text.secondary">
+              Estoque:
+            </Typography>
+            <Chip
+              label={produto.quantidadeEstoque}
+              color={getEstoqueColor(produto.quantidadeEstoque)}
+              size="small"
+              sx={{ ml: "auto", fontWeight: 500 }}
+            />
+          </Box>
+        </Stack>
+      </CardContent>
+
+      <CardActions sx={{ justifyContent: "flex-end", px: 2, pb: 2 }}>
+        <Tooltip title="Visualizar">
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={() => onView(produto)}
+          >
+            <VisibilityIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Deletar">
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => onDelete(produto)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </CardActions>
+    </Card>
+  );
+};
+
+/**
  * Tela principal de Controle de Estoque
  * Gerenciamento completo de produtos com CRUD
  */
@@ -73,6 +188,9 @@ const ControleEstoque = () => {
     mudarPagina,
     mudarTamanhoPagina,
   } = useProdutos();
+
+  // Hook de responsividade 
+  const { isMobile, isTablet, getPagePadding, getTablePageSize } = useBreakpoint();
 
   // Estados dos dialogs
   const [openFormDialog, setOpenFormDialog] = useState(false);
@@ -280,22 +398,28 @@ const ControleEstoque = () => {
         width: "100%",
         maxWidth: "1920px",
         margin: "0 auto",
-        p: 3,
+        px: { xs: 2, sm: 3, md: 4 },
+        py: { xs: 2, sm: 3 },
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: { xs: 3, md: 4 } }}>
         <Typography
           variant="h4"
           sx={{
             fontWeight: 700,
             color: "text.primary",
             mb: 1,
+            fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
           }}
         >
           Controle de Estoque
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}
+        >
           Gerencie os produtos da Napolitech
         </Typography>
       </Box>
@@ -303,60 +427,120 @@ const ControleEstoque = () => {
       {/* Dashboard Cards */}
       <EstoqueCards metricas={metricas} loading={loading} />
 
-      {/* Tabela de Produtos */}
-      <Paper
-        elevation={3}
-        sx={{
-          borderRadius: 2,
-          overflow: "hidden",
-        }}
-      >
-        <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Lista de Produtos
-          </Typography>
+      {/* Lista de Produtos - Adaptativa */}
+      {isMobile || isTablet ? (
+        // VISUALIZAÇÃO MOBILE/TABLET - CARDS
+        <Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Produtos ({paginacao.totalElements})
+            </Typography>
+          </Box>
+
+          <Grid container spacing={2}>
+            {produtos.map((produto) => (
+              <Grid item xs={12} sm={6} key={produto.id}>
+                <ProdutoCard
+                  produto={produto}
+                  onView={handleOpenDetailDialog}
+                  onDelete={handleOpenDeleteDialog}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          {/* Paginação Manual para Cards */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 2,
+              mt: 3,
+            }}
+          >
+            <IconButton
+              onClick={() => mudarPagina(paginacao.page - 1)}
+              disabled={paginacao.page === 0}
+              size="small"
+            >
+              ← Anterior
+            </IconButton>
+            <Typography variant="body2">
+              Página {paginacao.page + 1} de {paginacao.totalPages}
+            </Typography>
+            <IconButton
+              onClick={() => mudarPagina(paginacao.page + 1)}
+              disabled={paginacao.page >= paginacao.totalPages - 1}
+              size="small"
+            >
+              Próxima →
+            </IconButton>
+          </Box>
         </Box>
-
-        <DataGrid
-          rows={produtos}
-          columns={columns}
-          loading={loading}
-          paginationMode="server"
-          rowCount={paginacao.totalElements}
-          page={paginacao.page}
-          pageSize={paginacao.size}
-          onPageChange={mudarPagina}
-          onPageSizeChange={mudarTamanhoPagina}
-          rowsPerPageOptions={[5, 10, 20, 50]}
-          disableSelectionOnClick
-          autoHeight
+      ) : (
+        // VISUALIZAÇÃO DESKTOP - TABELA
+        <Paper
+          elevation={3}
           sx={{
-            border: 0,
-            "& .MuiDataGrid-cell": {
-              borderBottom: "1px solid",
-              borderColor: "divider",
-            },
-            "& .MuiDataGrid-columnHeaders": {
-              bgcolor: "background.default",
-              borderBottom: "2px solid",
-              borderColor: "divider",
-            },
-            "& .MuiDataGrid-row:hover": {
-              bgcolor: "action.hover",
-            },
+            borderRadius: 2,
+            overflow: "hidden",
           }}
-          localeText={{
-            noRowsLabel: "Nenhum produto encontrado",
-            MuiTablePagination: {
-              labelRowsPerPage: "Linhas por página:",
-              labelDisplayedRows: ({ from, to, count }) =>
-                `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`,
-            },
-          }}
-        />
-      </Paper>
+        >
+          <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Lista de Produtos
+            </Typography>
+          </Box>
 
-      {/* Floating Action Button */}
+          <DataGrid
+            rows={produtos}
+            columns={columns}
+            loading={loading}
+            paginationMode="server"
+            rowCount={paginacao.totalElements}
+            page={paginacao.page}
+            pageSize={paginacao.size}
+            onPageChange={mudarPagina}
+            onPageSizeChange={mudarTamanhoPagina}
+            rowsPerPageOptions={[5, 10, 20, 50]}
+            disableSelectionOnClick
+            autoHeight
+            sx={{
+              border: 0,
+              "& .MuiDataGrid-cell": {
+                borderBottom: "1px solid",
+                borderColor: "divider",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                bgcolor: "background.default",
+                borderBottom: "2px solid",
+                borderColor: "divider",
+              },
+              "& .MuiDataGrid-row:hover": {
+                bgcolor: "action.hover",
+              },
+            }}
+            localeText={{
+              noRowsLabel: "Nenhum produto encontrado",
+              MuiTablePagination: {
+                labelRowsPerPage: "Linhas por página:",
+                labelDisplayedRows: ({ from, to, count }) =>
+                  `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`,
+              },
+            }}
+          />
+        </Paper>
+      )}
+
+      {/* Floating Action Button - Responsivo */}
       <Tooltip title="Adicionar Produto" placement="left">
         <Fab
           color="primary"
@@ -364,9 +548,11 @@ const ControleEstoque = () => {
           onClick={handleOpenFormDialog}
           sx={{
             position: "fixed",
-            bottom: 32,
-            right: 32,
+            bottom: { xs: 16, sm: 24, md: 32 },
+            right: { xs: 16, sm: 24, md: 32 },
+            zIndex: 1000,
           }}
+          size={isMobile ? "medium" : "large"}
         >
           <AddIcon />
         </Fab>

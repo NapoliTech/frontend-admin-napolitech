@@ -13,6 +13,8 @@ import {
   Grid,
   Paper,
   Skeleton,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Close as CloseIcon,
@@ -99,6 +101,9 @@ const InfoItem = ({ icon, label, value, color = "primary" }) => (
  * Dialog para visualizar detalhes completos de um produto
  */
 const ProdutoDetailDialog = ({ open, onClose, produto, loading }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   // Determinar cor do chip de estoque
   const getEstoqueColor = (quantidade) => {
     if (quantidade === 0) return "error";
@@ -118,9 +123,10 @@ const ProdutoDetailDialog = ({ open, onClose, produto, loading }) => {
       onClose={onClose}
       maxWidth="md"
       fullWidth
+      fullScreen={isMobile}
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: isMobile ? 0 : 2,
         },
       }}
     >

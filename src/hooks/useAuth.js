@@ -12,13 +12,11 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const data = await authService.login(credentials);
-
-      // Armazenar token no localStorage
-      localStorage.setItem("token", data.token);
+      // authService.login já salva o token no sessionStorage
+      const token = await authService.login(credentials);
 
       setLoading(false);
-      return data;
+      return token;
     } catch (err) {
       setError(err.response?.data?.message || "Erro ao fazer login");
       setLoading(false);
@@ -32,13 +30,15 @@ export const useAuth = () => {
     } catch (error) {
       console.error("Erro ao fazer logout:", error);
     } finally {
-      localStorage.removeItem("token");
-      navigate("/login");
+      // Limpar sessionStorage (padronizado)
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userData");
+      navigate("/");
     }
   };
 
   const isAuthenticated = () => {
-    return !!localStorage.getItem("token");
+    return !!sessionStorage.getItem("token");
   };
 
   return {

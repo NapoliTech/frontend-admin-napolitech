@@ -13,6 +13,8 @@ import {
   InputAdornment,
   Alert,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   Close as CloseIcon,
@@ -39,6 +41,9 @@ const CATEGORIAS = [
  * Validação em tempo real e feedback visual
  */
 const ProdutoFormDialog = ({ open, onClose, onSubmit, loading }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   const [formData, setFormData] = useState({
     nome: "",
     preco: "",
@@ -187,9 +192,10 @@ const ProdutoFormDialog = ({ open, onClose, onSubmit, loading }) => {
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      fullScreen={isMobile}
       PaperProps={{
         sx: {
-          borderRadius: 2,
+          borderRadius: isMobile ? 0 : 2,
         },
       }}
     >

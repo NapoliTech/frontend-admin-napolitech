@@ -22,14 +22,17 @@ httpClient.interceptors.request.use(
 );
 
 
-// Interceptar respostas para tratar erros de autenticação (401)
+// Interceptar respostas para tratar erros de autenticação (401) e autorização (403)
 httpClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token expirado ou inválido
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Token expirado, inválido ou sem permissão
+      console.error(`Erro ${error.response.status}: ${error.response.data?.message || 'Acesso negado'}`);
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userData");
+      // Redirecionar para a rota correta de login ("/")
+      window.location.href = "/";
     }
     return Promise.reject(error);
   }

@@ -22,7 +22,9 @@ import {
   Chip,
   ButtonGroup,
   TextField,
-  InputAdornment
+  InputAdornment,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import {
   LocalPizza,
@@ -48,6 +50,9 @@ import PedidoCard from "../moleculas/PedidoCard";
 import ProdutoListItem from "../moleculas/ProdutoListItem";
 
 const MontarPedidoForm = ({ onContinue, onRetirarNaLoja }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  
   const [tamanho, setTamanho] = useState("");
   const [borda, setBorda] = useState("");
   const [openPizzaDialog, setOpenPizzaDialog] = useState(false);
@@ -579,6 +584,12 @@ const MontarPedidoForm = ({ onContinue, onRetirarNaLoja }) => {
         onClose={() => setOpenPizzaDialog(false)}
         maxWidth="md"
         fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: isMobile ? 0 : 2,
+          },
+        }}
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
           <LocalPizza sx={{ mr: 1 }} />
@@ -713,6 +724,12 @@ const MontarPedidoForm = ({ onContinue, onRetirarNaLoja }) => {
         onClose={() => setOpenBebidaDialog(false)}
         maxWidth="md"
         fullWidth
+        fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: isMobile ? 0 : 2,
+          },
+        }}
       >
         <DialogTitle sx={{ display: "flex", alignItems: "center" }}>
           <LocalDrink sx={{ mr: 1 }} />
